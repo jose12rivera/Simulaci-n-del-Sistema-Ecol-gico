@@ -45,32 +45,57 @@ class EcosystemSimulator:
         }
         
     def create_widgets(self):
-        # Frame principal
-        main_frame = tk.Frame(self.root, bg="#f0f9ff")
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Crear frame principal con scrollbar
+        main_container = tk.Frame(self.root, bg="#f0f9ff")
+        main_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Crear canvas y scrollbar
+        self.canvas = tk.Canvas(main_container, bg="#f0f9ff", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=self.canvas.yview)
+        
+        # Frame principal que contendrá todo el contenido
+        self.main_frame = tk.Frame(self.canvas, bg="#f0f9ff")
+        
+        # Configurar el canvas para el scroll
+        self.main_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        # Crear ventana en el canvas
+        self.canvas.create_window((0, 0), window=self.main_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Empaquetar canvas y scrollbar
+        self.canvas.pack(side="left", fill="both", expand=True, padx=20, pady=20)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Configurar el scroll con la rueda del mouse
+        self.canvas.bind("<MouseWheel>", self._on_mousewheel)
+        self.main_frame.bind("<MouseWheel>", self._on_mousewheel)
         
         # Header
-        self.create_header(main_frame)
+        self.create_header(self.main_frame)
         
         # Frame de alertas
-        self.alert_frame = tk.Frame(main_frame, bg="#fee2e2", relief=tk.RIDGE, bd=2)
+        self.alert_frame = tk.Frame(self.main_frame, bg="#fee2e2", relief=tk.RIDGE, bd=2)
         self.alert_label = tk.Label(self.alert_frame, text="", bg="#fee2e2", 
                                     fg="#991b1b", font=("Arial", 10, "bold"), 
                                     justify=tk.LEFT, wraplength=1500)
         self.alert_label.pack(padx=10, pady=10)
         
         # Frame de estadísticas
-        stats_frame = tk.Frame(main_frame, bg="#f0f9ff")
+        stats_frame = tk.Frame(self.main_frame, bg="#f0f9ff")
         stats_frame.pack(fill=tk.X, pady=10)
         
         self.create_stat_cards(stats_frame)
         
         # Frame de configuración
-        self.config_frame = tk.Frame(main_frame, bg="white", relief=tk.RIDGE, bd=2)
+        self.config_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
         self.create_config_panel()
         
         # Frame del gráfico con selector
-        graph_container = tk.Frame(main_frame, bg="white", relief=tk.RIDGE, bd=2)
+        graph_container = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
         graph_container.pack(fill=tk.BOTH, expand=True, pady=10)
         
         # Selector de tipo de gráfico
@@ -103,7 +128,7 @@ class EcosystemSimulator:
         self.create_graph_canvas(graph_container)
         
         # Frame de análisis
-        self.analysis_frame = tk.Frame(main_frame, bg="white", relief=tk.RIDGE, bd=2)
+        self.analysis_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
         self.analysis_frame.pack(fill=tk.X, pady=10)
         
         analysis_title = tk.Label(self.analysis_frame, text="💡 Análisis y Recomendaciones", 
@@ -113,6 +138,72 @@ class EcosystemSimulator:
         self.analysis_text = tk.Text(self.analysis_frame, height=6, wrap=tk.WORD, 
                                     font=("Arial", 10), relief=tk.FLAT, bg="#f9fafb")
         self.analysis_text.pack(fill=tk.X, padx=15, pady=(0, 10))
+        
+        # Añadir más contenido para hacer scroll necesario
+        self.create_additional_content()
+        
+    def _on_mousewheel(self, event):
+        """Manejar el scroll del mouse"""
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        
+    def create_additional_content(self):
+        """Crear contenido adicional para hacer el scroll más útil"""
+        # Información adicional sobre el ecosistema
+        info_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
+        info_frame.pack(fill=tk.X, pady=10)
+        
+        info_title = tk.Label(info_frame, text="📋 Información del Ecosistema", 
+                             bg="white", fg="#1f2937", font=("Arial", 14, "bold"))
+        info_title.pack(anchor=tk.W, padx=15, pady=(10, 5))
+        
+        info_text = """
+Este simulador representa un ecosistema simplificado con tres componentes principales:
+
+🦊 ZORROS (Depredadores):
+- Se alimentan de conejos
+- Tienen una tasa de mortalidad natural
+- Su población crece cuando hay suficiente comida
+
+🐰 CONEJOS (Herbívoros):
+- Se alimentan de zanahorias
+- Son presa de los zorros
+- Tienen tasa de reproducción y mortalidad natural
+
+🥕 ZANAHORIAS (Recursos):
+- Crecen a una tasa constante
+- Son consumidas por los conejos
+- Tienen un límite máximo de crecimiento
+
+El equilibrio del ecosistema depende de la interacción entre estas tres poblaciones.
+Si alguna población se extingue, todo el sistema puede colapsar.
+"""
+        
+        info_label = tk.Label(info_frame, text=info_text, bg="white", fg="#374151",
+                             font=("Arial", 10), justify=tk.LEFT, wraplength=1500)
+        info_label.pack(anchor=tk.W, padx=15, pady=(0, 10))
+        
+        # Consejos de uso
+        tips_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
+        tips_frame.pack(fill=tk.X, pady=10)
+        
+        tips_title = tk.Label(tips_frame, text="💡 Consejos de Uso", 
+                             bg="white", fg="#1f2937", font=("Arial", 14, "bold"))
+        tips_title.pack(anchor=tk.W, padx=15, pady=(10, 5))
+        
+        tips_text = """
+• Comienza con los valores predeterminados para ver un ecosistema equilibrado
+• Experimenta cambiando las poblaciones iniciales en la configuración
+• Observa cómo los gráficos muestran las tendencias a lo largo del tiempo
+• Presta atención a las alertas cuando las poblaciones estén en peligro
+• Usa los diferentes tipos de gráficos para analizar los datos de distintas formas
+• El gráfico de pastel muestra la distribución actual de las poblaciones
+• El gráfico de barras muestra los últimos 20 días de evolución
+• El gráfico de líneas muestra toda la historia de la simulación
+"""
+        
+        tips_label = tk.Label(tips_frame, text=tips_text, bg="white", fg="#374151",
+                             font=("Arial", 10), justify=tk.LEFT, wraplength=1500)
+        tips_label.pack(anchor=tk.W, padx=15, pady=(0, 10))
         
     def create_header(self, parent):
         header_frame = tk.Frame(parent, bg="white", relief=tk.RIDGE, bd=2)
