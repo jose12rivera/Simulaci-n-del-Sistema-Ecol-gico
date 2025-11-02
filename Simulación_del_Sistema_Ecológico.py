@@ -6,8 +6,15 @@ class EcosystemSimulator:
     def __init__(self, root):
         self.root = root
         self.root.title("🦊 Simulador de Ecosistema - Parque Nacional")
-        self.root.geometry("1600x1000")
+        
+        # Configurar para pantalla completa
+        self.root.attributes('-fullscreen', True)
         self.root.configure(bg="#f0f9ff")
+        
+        # Botón para salir de pantalla completa (opcional)
+        self.root.bind("<Escape>", lambda e: self.root.attributes('-fullscreen', False))
+        self.root.bind("<F11>", lambda e: self.root.attributes('-fullscreen', 
+                          not self.root.attributes('-fullscreen')))
         
         # Parámetros iniciales
         self.params = {
@@ -80,13 +87,13 @@ class EcosystemSimulator:
         # Frame de alertas
         self.alert_frame = tk.Frame(self.main_frame, bg="#fee2e2", relief=tk.RIDGE, bd=2)
         self.alert_label = tk.Label(self.alert_frame, text="", bg="#fee2e2", 
-                                    fg="#991b1b", font=("Arial", 10, "bold"), 
-                                    justify=tk.LEFT, wraplength=1500)
-        self.alert_label.pack(padx=10, pady=10)
+                                    fg="#991b1b", font=("Arial", 12, "bold"), 
+                                    justify=tk.LEFT, wraplength=1800)
+        self.alert_label.pack(padx=15, pady=10)
         
         # Frame de estadísticas
         stats_frame = tk.Frame(self.main_frame, bg="#f0f9ff")
-        stats_frame.pack(fill=tk.X, pady=10)
+        stats_frame.pack(fill=tk.X, pady=15)
         
         self.create_stat_cards(stats_frame)
         
@@ -96,32 +103,39 @@ class EcosystemSimulator:
         
         # Frame del gráfico con selector
         graph_container = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
-        graph_container.pack(fill=tk.BOTH, expand=True, pady=10)
+        graph_container.pack(fill=tk.BOTH, expand=True, pady=15)
         
         # Selector de tipo de gráfico
         selector_frame = tk.Frame(graph_container, bg="white")
-        selector_frame.pack(fill=tk.X, padx=15, pady=10)
+        selector_frame.pack(fill=tk.X, padx=20, pady=15)
         
         tk.Label(selector_frame, text="📊 Tipo de Gráfico:", 
-                bg="white", fg="#1f2937", font=("Arial", 14, "bold")).pack(side=tk.LEFT, padx=(0, 10))
+                bg="white", fg="#1f2937", font=("Arial", 16, "bold")).pack(side=tk.LEFT, padx=(0, 20))
         
         btn_line = tk.Button(selector_frame, text="📈 Líneas", 
                             command=lambda: self.change_graph("line"),
-                            bg="#3b82f6", fg="white", font=("Arial", 10, "bold"),
-                            padx=15, pady=6, cursor="hand2", relief=tk.FLAT)
-        btn_line.pack(side=tk.LEFT, padx=5)
+                            bg="#3b82f6", fg="white", font=("Arial", 12, "bold"),
+                            padx=20, pady=8, cursor="hand2", relief=tk.FLAT)
+        btn_line.pack(side=tk.LEFT, padx=8)
         
         btn_bar = tk.Button(selector_frame, text="📊 Barras", 
                            command=lambda: self.change_graph("bar"),
-                           bg="#8b5cf6", fg="white", font=("Arial", 10, "bold"),
-                           padx=15, pady=6, cursor="hand2", relief=tk.FLAT)
-        btn_bar.pack(side=tk.LEFT, padx=5)
+                           bg="#8b5cf6", fg="white", font=("Arial", 12, "bold"),
+                           padx=20, pady=8, cursor="hand2", relief=tk.FLAT)
+        btn_bar.pack(side=tk.LEFT, padx=8)
         
         btn_pie = tk.Button(selector_frame, text="🥧 Pastel", 
                            command=lambda: self.change_graph("pie"),
-                           bg="#ec4899", fg="white", font=("Arial", 10, "bold"),
-                           padx=15, pady=6, cursor="hand2", relief=tk.FLAT)
-        btn_pie.pack(side=tk.LEFT, padx=5)
+                           bg="#ec4899", fg="white", font=("Arial", 12, "bold"),
+                           padx=20, pady=8, cursor="hand2", relief=tk.FLAT)
+        btn_pie.pack(side=tk.LEFT, padx=8)
+        
+        # Botón para pantalla completa
+        btn_fullscreen = tk.Button(selector_frame, text="⛶ Pantalla Completa", 
+                                  command=self.toggle_fullscreen,
+                                  bg="#10b981", fg="white", font=("Arial", 10, "bold"),
+                                  padx=15, pady=6, cursor="hand2", relief=tk.FLAT)
+        btn_fullscreen.pack(side=tk.RIGHT, padx=8)
         
         self.graph_buttons = {"line": btn_line, "bar": btn_bar, "pie": btn_pie}
         
@@ -129,18 +143,23 @@ class EcosystemSimulator:
         
         # Frame de análisis
         self.analysis_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
-        self.analysis_frame.pack(fill=tk.X, pady=10)
+        self.analysis_frame.pack(fill=tk.X, pady=15)
         
         analysis_title = tk.Label(self.analysis_frame, text="💡 Análisis y Recomendaciones", 
-                                 bg="white", fg="#1f2937", font=("Arial", 14, "bold"))
-        analysis_title.pack(anchor=tk.W, padx=15, pady=(10, 5))
+                                 bg="white", fg="#1f2937", font=("Arial", 16, "bold"))
+        analysis_title.pack(anchor=tk.W, padx=20, pady=(15, 10))
         
-        self.analysis_text = tk.Text(self.analysis_frame, height=6, wrap=tk.WORD, 
-                                    font=("Arial", 10), relief=tk.FLAT, bg="#f9fafb")
-        self.analysis_text.pack(fill=tk.X, padx=15, pady=(0, 10))
+        self.analysis_text = tk.Text(self.analysis_frame, height=8, wrap=tk.WORD, 
+                                    font=("Arial", 12), relief=tk.FLAT, bg="#f9fafb")
+        self.analysis_text.pack(fill=tk.X, padx=20, pady=(0, 15))
         
         # Añadir más contenido para hacer scroll necesario
         self.create_additional_content()
+        
+    def toggle_fullscreen(self):
+        """Alternar entre pantalla completa y ventana normal"""
+        current_state = self.root.attributes('-fullscreen')
+        self.root.attributes('-fullscreen', not current_state)
         
     def _on_mousewheel(self, event):
         """Manejar el scroll del mouse"""
@@ -150,11 +169,11 @@ class EcosystemSimulator:
         """Crear contenido adicional para hacer el scroll más útil"""
         # Información adicional sobre el ecosistema
         info_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
-        info_frame.pack(fill=tk.X, pady=10)
+        info_frame.pack(fill=tk.X, pady=15)
         
         info_title = tk.Label(info_frame, text="📋 Información del Ecosistema", 
-                             bg="white", fg="#1f2937", font=("Arial", 14, "bold"))
-        info_title.pack(anchor=tk.W, padx=15, pady=(10, 5))
+                             bg="white", fg="#1f2937", font=("Arial", 16, "bold"))
+        info_title.pack(anchor=tk.W, padx=20, pady=(15, 10))
         
         info_text = """
 Este simulador representa un ecosistema simplificado con tres componentes principales:
@@ -179,16 +198,16 @@ Si alguna población se extingue, todo el sistema puede colapsar.
 """
         
         info_label = tk.Label(info_frame, text=info_text, bg="white", fg="#374151",
-                             font=("Arial", 10), justify=tk.LEFT, wraplength=1500)
-        info_label.pack(anchor=tk.W, padx=15, pady=(0, 10))
+                             font=("Arial", 12), justify=tk.LEFT, wraplength=1800)
+        info_label.pack(anchor=tk.W, padx=20, pady=(0, 15))
         
         # Consejos de uso
         tips_frame = tk.Frame(self.main_frame, bg="white", relief=tk.RIDGE, bd=2)
-        tips_frame.pack(fill=tk.X, pady=10)
+        tips_frame.pack(fill=tk.X, pady=15)
         
         tips_title = tk.Label(tips_frame, text="💡 Consejos de Uso", 
-                             bg="white", fg="#1f2937", font=("Arial", 14, "bold"))
-        tips_title.pack(anchor=tk.W, padx=15, pady=(10, 5))
+                             bg="white", fg="#1f2937", font=("Arial", 16, "bold"))
+        tips_title.pack(anchor=tk.W, padx=20, pady=(15, 10))
         
         tips_text = """
 • Comienza con los valores predeterminados para ver un ecosistema equilibrado
@@ -199,104 +218,105 @@ Si alguna población se extingue, todo el sistema puede colapsar.
 • El gráfico de pastel muestra la distribución actual de las poblaciones
 • El gráfico de barras muestra los últimos 20 días de evolución
 • El gráfico de líneas muestra toda la historia de la simulación
+• Presiona F11 o Escape para alternar pantalla completa
 """
         
         tips_label = tk.Label(tips_frame, text=tips_text, bg="white", fg="#374151",
-                             font=("Arial", 10), justify=tk.LEFT, wraplength=1500)
-        tips_label.pack(anchor=tk.W, padx=15, pady=(0, 10))
+                             font=("Arial", 12), justify=tk.LEFT, wraplength=1800)
+        tips_label.pack(anchor=tk.W, padx=20, pady=(0, 15))
         
     def create_header(self, parent):
         header_frame = tk.Frame(parent, bg="white", relief=tk.RIDGE, bd=2)
-        header_frame.pack(fill=tk.X, pady=(0, 10))
+        header_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Título y día
         title_frame = tk.Frame(header_frame, bg="white")
-        title_frame.pack(side=tk.LEFT, padx=20, pady=15)
+        title_frame.pack(side=tk.LEFT, padx=25, pady=20)
         
         title_label = tk.Label(title_frame, text="🦊 Simulador de Ecosistema - Parque Nacional", 
-                              bg="white", fg="#1f2937", font=("Arial", 18, "bold"))
+                              bg="white", fg="#1f2937", font=("Arial", 24, "bold"))
         title_label.pack(anchor=tk.W)
         
         self.day_label = tk.Label(title_frame, text="Día: 0", 
-                                 bg="white", fg="#2563eb", font=("Arial", 12, "bold"))
+                                 bg="white", fg="#2563eb", font=("Arial", 14, "bold"))
         self.day_label.pack(anchor=tk.W)
         
         # Botones
         button_frame = tk.Frame(header_frame, bg="white")
-        button_frame.pack(side=tk.RIGHT, padx=20, pady=15)
+        button_frame.pack(side=tk.RIGHT, padx=25, pady=20)
         
         self.play_button = tk.Button(button_frame, text="▶ Iniciar", 
                                      command=self.toggle_simulation,
-                                     bg="#22c55e", fg="white", font=("Arial", 11, "bold"),
-                                     padx=20, pady=8, cursor="hand2", relief=tk.FLAT)
-        self.play_button.pack(side=tk.LEFT, padx=5)
+                                     bg="#22c55e", fg="white", font=("Arial", 12, "bold"),
+                                     padx=25, pady=10, cursor="hand2", relief=tk.FLAT)
+        self.play_button.pack(side=tk.LEFT, padx=8)
         
         reset_button = tk.Button(button_frame, text="↻ Reiniciar", 
                                 command=self.reset_button_click,
-                                bg="#6b7280", fg="white", font=("Arial", 11, "bold"),
-                                padx=20, pady=8, cursor="hand2", relief=tk.FLAT)
-        reset_button.pack(side=tk.LEFT, padx=5)
+                                bg="#6b7280", fg="white", font=("Arial", 12, "bold"),
+                                padx=25, pady=10, cursor="hand2", relief=tk.FLAT)
+        reset_button.pack(side=tk.LEFT, padx=8)
         
         self.config_button = tk.Button(button_frame, text="⚙ Configurar", 
                                        command=self.toggle_config,
-                                       bg="#3b82f6", fg="white", font=("Arial", 11, "bold"),
-                                       padx=20, pady=8, cursor="hand2", relief=tk.FLAT)
-        self.config_button.pack(side=tk.LEFT, padx=5)
+                                       bg="#3b82f6", fg="white", font=("Arial", 12, "bold"),
+                                       padx=25, pady=10, cursor="hand2", relief=tk.FLAT)
+        self.config_button.pack(side=tk.LEFT, padx=8)
         
     def create_stat_cards(self, parent):
         # Tarjeta Zorros
         fox_frame = tk.Frame(parent, bg="#f97316", relief=tk.RIDGE, bd=0)
-        fox_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        fox_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=8)
         
         tk.Label(fox_frame, text="🦊 Zorros", bg="#f97316", fg="white", 
-                font=("Arial", 14, "bold")).pack(anchor=tk.W, padx=20, pady=(15, 5))
+                font=("Arial", 16, "bold")).pack(anchor=tk.W, padx=25, pady=(20, 8))
         
         self.fox_value = tk.Label(fox_frame, text="10.0", bg="#f97316", fg="white", 
-                                 font=("Arial", 32, "bold"))
-        self.fox_value.pack(anchor=tk.W, padx=20)
+                                 font=("Arial", 36, "bold"))
+        self.fox_value.pack(anchor=tk.W, padx=25)
         
         self.fox_initial = tk.Label(fox_frame, text=f"Inicial: {self.params['foxes_init']}", 
-                                   bg="#f97316", fg="white", font=("Arial", 9))
-        self.fox_initial.pack(anchor=tk.W, padx=20, pady=(0, 15))
+                                   bg="#f97316", fg="white", font=("Arial", 11))
+        self.fox_initial.pack(anchor=tk.W, padx=25, pady=(0, 20))
         
         # Tarjeta Conejos
         rabbit_frame = tk.Frame(parent, bg="#6b7280", relief=tk.RIDGE, bd=0)
-        rabbit_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        rabbit_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=8)
         
         tk.Label(rabbit_frame, text="🐰 Conejos", bg="#6b7280", fg="white", 
-                font=("Arial", 14, "bold")).pack(anchor=tk.W, padx=20, pady=(15, 5))
+                font=("Arial", 16, "bold")).pack(anchor=tk.W, padx=25, pady=(20, 8))
         
         self.rabbit_value = tk.Label(rabbit_frame, text="50.0", bg="#6b7280", fg="white", 
-                                     font=("Arial", 32, "bold"))
-        self.rabbit_value.pack(anchor=tk.W, padx=20)
+                                     font=("Arial", 36, "bold"))
+        self.rabbit_value.pack(anchor=tk.W, padx=25)
         
         self.rabbit_initial = tk.Label(rabbit_frame, text=f"Inicial: {self.params['rabbits_init']}", 
-                                      bg="#6b7280", fg="white", font=("Arial", 9))
-        self.rabbit_initial.pack(anchor=tk.W, padx=20, pady=(0, 15))
+                                      bg="#6b7280", fg="white", font=("Arial", 11))
+        self.rabbit_initial.pack(anchor=tk.W, padx=25, pady=(0, 20))
         
         # Tarjeta Zanahorias
         carrot_frame = tk.Frame(parent, bg="#fb923c", relief=tk.RIDGE, bd=0)
-        carrot_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        carrot_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=8)
         
         tk.Label(carrot_frame, text="🥕 Zanahorias", bg="#fb923c", fg="white", 
-                font=("Arial", 14, "bold")).pack(anchor=tk.W, padx=20, pady=(15, 5))
+                font=("Arial", 16, "bold")).pack(anchor=tk.W, padx=25, pady=(20, 8))
         
         self.carrot_value = tk.Label(carrot_frame, text="200", bg="#fb923c", fg="white", 
-                                     font=("Arial", 32, "bold"))
-        self.carrot_value.pack(anchor=tk.W, padx=20)
+                                     font=("Arial", 36, "bold"))
+        self.carrot_value.pack(anchor=tk.W, padx=25)
         
         self.carrot_initial = tk.Label(carrot_frame, text=f"Inicial: {self.params['carrots_init']}", 
-                                      bg="#fb923c", fg="white", font=("Arial", 9))
-        self.carrot_initial.pack(anchor=tk.W, padx=20, pady=(0, 15))
+                                      bg="#fb923c", fg="white", font=("Arial", 11))
+        self.carrot_initial.pack(anchor=tk.W, padx=25, pady=(0, 20))
         
     def create_config_panel(self):
         title = tk.Label(self.config_frame, text="⚙️ Configuración del Ecosistema", 
-                        bg="white", fg="#1f2937", font=("Arial", 14, "bold"))
-        title.pack(anchor=tk.W, padx=15, pady=(10, 5))
+                        bg="white", fg="#1f2937", font=("Arial", 16, "bold"))
+        title.pack(anchor=tk.W, padx=20, pady=(15, 10))
         
         # Grid de configuración
         grid_frame = tk.Frame(self.config_frame, bg="white")
-        grid_frame.pack(fill=tk.X, padx=15, pady=(0, 10))
+        grid_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
         
         configs = [
             ("Zorros iniciales:", 'foxes_init', 0),
@@ -311,15 +331,15 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         
         for i, (label_text, key, col) in enumerate(configs):
             frame = tk.Frame(grid_frame, bg="white")
-            frame.grid(row=0, column=col, padx=10, pady=5, sticky="ew")
+            frame.grid(row=0, column=col, padx=12, pady=8, sticky="ew")
             
             label = tk.Label(frame, text=label_text, bg="white", fg="#374151", 
-                           font=("Arial", 9, "bold"))
+                           font=("Arial", 11, "bold"))
             label.pack(anchor=tk.W)
             
-            entry = tk.Entry(frame, font=("Arial", 10), relief=tk.SOLID, bd=1)
+            entry = tk.Entry(frame, font=("Arial", 12), relief=tk.SOLID, bd=1)
             entry.insert(0, str(self.params[key]))
-            entry.pack(fill=tk.X)
+            entry.pack(fill=tk.X, pady=(5, 0))
             
             self.config_entries[key] = entry
         
@@ -329,7 +349,7 @@ Si alguna población se extingue, todo el sistema puede colapsar.
     def create_graph_canvas(self, parent):
         # Crear canvas para el gráfico
         self.canvas_frame = tk.Frame(parent, bg="white")
-        self.canvas_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 10))
+        self.canvas_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 15))
         
         self.graph_canvas = tk.Canvas(self.canvas_frame, bg="white", highlightthickness=1, 
                                      highlightbackground="#d1d5db")
@@ -337,14 +357,14 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         
         # Leyenda
         legend_frame = tk.Frame(self.canvas_frame, bg="white")
-        legend_frame.pack(fill=tk.X, pady=5)
+        legend_frame.pack(fill=tk.X, pady=8)
         
         tk.Label(legend_frame, text="🦊 Zorros", fg="#f97316", bg="white", 
-                font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=20)
+                font=("Arial", 12, "bold")).pack(side=tk.LEFT, padx=25)
         tk.Label(legend_frame, text="🐰 Conejos", fg="#6b7280", bg="white", 
-                font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=20)
+                font=("Arial", 12, "bold")).pack(side=tk.LEFT, padx=25)
         tk.Label(legend_frame, text="🥕 Zanahorias", fg="#fb923c", bg="white", 
-                font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=20)
+                font=("Arial", 12, "bold")).pack(side=tk.LEFT, padx=25)
     
     def change_graph(self, graph_type):
         self.current_graph = graph_type
@@ -359,7 +379,11 @@ Si alguna población se extingue, todo el sistema puede colapsar.
                           "#8b5cf6" if gtype == "bar" else "#ec4899")
         
         self.draw_graph()
-        
+    
+    # Los métodos draw_graph, draw_line_graph, draw_bar_graph, draw_3d_bar, draw_pie_chart
+    # se mantienen igual que en la versión anterior, pero se adaptan automáticamente
+    # al tamaño de pantalla completa
+    
     def draw_graph(self):
         if self.current_graph == "line":
             self.draw_line_graph()
@@ -380,7 +404,7 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         if width <= 1 or height <= 1:
             return
             
-        padding = 60
+        padding = 80  # Más padding para pantalla grande
         graph_width = width - 2 * padding
         graph_height = height - 2 * padding
         
@@ -395,16 +419,16 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         for i in range(5):
             y = padding + (i * graph_height / 4)
             self.graph_canvas.create_line(padding, y, width - padding, y, 
-                                         fill="#e5e7eb", width=1, dash=(2, 4))
+                                         fill="#e5e7eb", width=2, dash=(2, 4))
             value = max_value * (1 - i / 4)
-            self.graph_canvas.create_text(padding - 10, y, text=f"{value:.0f}", 
-                                         anchor=tk.E, font=("Arial", 9), fill="#6b7280")
+            self.graph_canvas.create_text(padding - 15, y, text=f"{value:.0f}", 
+                                         anchor=tk.E, font=("Arial", 11), fill="#6b7280")
         
-        # Dibujar ejes principales
+        # Dibujar ejes principales (más gruesos)
         self.graph_canvas.create_line(padding, height - padding, width - padding, 
-                                     height - padding, width=3, fill="#374151")
+                                     height - padding, width=4, fill="#374151")
         self.graph_canvas.create_line(padding, padding, padding, height - padding, 
-                                     width=3, fill="#374151")
+                                     width=4, fill="#374151")
         
         # Preparar puntos
         points_foxes = []
@@ -439,29 +463,29 @@ Si alguna población se extingue, todo el sistema puede colapsar.
             area_points.extend([width - padding, height - padding, padding, height - padding])
             self.graph_canvas.create_polygon(area_points, fill="#fed7aa", outline="")
         
-        # Dibujar las líneas principales
+        # Dibujar las líneas principales (más gruesas)
         if len(points_carrots) >= 4:
-            self.graph_canvas.create_line(points_carrots, fill="#fb923c", width=4, 
+            self.graph_canvas.create_line(points_carrots, fill="#fb923c", width=5, 
                                          smooth=True, capstyle=tk.ROUND)
         if len(points_rabbits) >= 4:
-            self.graph_canvas.create_line(points_rabbits, fill="#6b7280", width=4, 
+            self.graph_canvas.create_line(points_rabbits, fill="#6b7280", width=5, 
                                          smooth=True, capstyle=tk.ROUND)
         if len(points_foxes) >= 4:
-            self.graph_canvas.create_line(points_foxes, fill="#f97316", width=4, 
+            self.graph_canvas.create_line(points_foxes, fill="#f97316", width=5, 
                                          smooth=True, capstyle=tk.ROUND)
         
-        # Dibujar puntos destacados
+        # Dibujar puntos destacados (más grandes)
         for i in range(0, len(points_foxes), 4):
             if i < len(points_foxes):
                 x, y = points_foxes[i], points_foxes[i+1]
-                self.graph_canvas.create_oval(x-4, y-4, x+4, y+4, fill="#f97316", 
+                self.graph_canvas.create_oval(x-6, y-6, x+6, y+6, fill="#f97316", 
                                              outline="white", width=2)
         
-        # Etiquetas
-        self.graph_canvas.create_text(width // 2, height - 20, text="Días", 
-                                     font=("Arial", 12, "bold"), fill="#1f2937")
-        self.graph_canvas.create_text(25, height // 2, text="Población", angle=90, 
-                                     font=("Arial", 12, "bold"), fill="#1f2937")
+        # Etiquetas (más grandes)
+        self.graph_canvas.create_text(width // 2, height - 30, text="Días", 
+                                     font=("Arial", 14, "bold"), fill="#1f2937")
+        self.graph_canvas.create_text(30, height // 2, text="Población", angle=90, 
+                                     font=("Arial", 14, "bold"), fill="#1f2937")
     
     def draw_bar_graph(self):
         if len(self.history['day']) < 1:
@@ -475,7 +499,7 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         if width <= 1 or height <= 1:
             return
             
-        padding = 60
+        padding = 80  # Más padding para pantalla grande
         graph_width = width - 2 * padding
         graph_height = height - 2 * padding
         
@@ -494,20 +518,20 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         for i in range(5):
             y = padding + (i * graph_height / 4)
             self.graph_canvas.create_line(padding, y, width - padding, y, 
-                                         fill="#e5e7eb", width=1, dash=(2, 4))
+                                         fill="#e5e7eb", width=2, dash=(2, 4))
             value = max_value * (1 - i / 4)
-            self.graph_canvas.create_text(padding - 10, y, text=f"{value:.0f}", 
-                                         anchor=tk.E, font=("Arial", 9), fill="#6b7280")
+            self.graph_canvas.create_text(padding - 15, y, text=f"{value:.0f}", 
+                                         anchor=tk.E, font=("Arial", 11), fill="#6b7280")
         
-        # Dibujar ejes
+        # Dibujar ejes (más gruesos)
         self.graph_canvas.create_line(padding, height - padding, width - padding, 
-                                     height - padding, width=3, fill="#374151")
+                                     height - padding, width=4, fill="#374151")
         self.graph_canvas.create_line(padding, padding, padding, height - padding, 
-                                     width=3, fill="#374151")
+                                     width=4, fill="#374151")
         
-        # Calcular ancho de barras
+        # Calcular ancho de barras (más anchas)
         bar_group_width = graph_width / days_to_show
-        bar_width = bar_group_width / 4
+        bar_width = bar_group_width / 3.5  # Barras más anchas
         
         for i in range(days_to_show):
             x = padding + (i * bar_group_width) + bar_group_width / 2
@@ -533,24 +557,24 @@ Si alguna población se extingue, todo el sistema puede colapsar.
             
             # Etiqueta del día
             if i % 2 == 0:
-                self.graph_canvas.create_text(x, height - padding + 15, 
+                self.graph_canvas.create_text(x, height - padding + 20, 
                                              text=f"D{days[i]}", 
-                                             font=("Arial", 8), fill="#6b7280")
+                                             font=("Arial", 10), fill="#6b7280")
         
-        # Etiquetas
-        self.graph_canvas.create_text(width // 2, height - 20, text="Días", 
-                                     font=("Arial", 12, "bold"), fill="#1f2937")
-        self.graph_canvas.create_text(25, height // 2, text="Población", angle=90, 
-                                     font=("Arial", 12, "bold"), fill="#1f2937")
+        # Etiquetas (más grandes)
+        self.graph_canvas.create_text(width // 2, height - 30, text="Días", 
+                                     font=("Arial", 14, "bold"), fill="#1f2937")
+        self.graph_canvas.create_text(30, height // 2, text="Población", angle=90, 
+                                     font=("Arial", 14, "bold"), fill="#1f2937")
     
     def draw_3d_bar(self, x1, y1, x2, y2, color, dark_color):
         # Sombra - usar gris claro en lugar de transparencia
-        self.graph_canvas.create_rectangle(x1 + 3, y1 + 3, x2 + 3, y2 + 3, 
+        self.graph_canvas.create_rectangle(x1 + 4, y1 + 4, x2 + 4, y2 + 4, 
                                           fill="#d1d5db", outline="")
         
         # Barra principal con gradiente simulado
         bar_height = y2 - y1
-        steps = max(1, int(bar_height / 5))
+        steps = max(1, int(bar_height / 6))  # Más pasos para mejor gradiente
         
         for i in range(steps):
             y_start = y1 + (i * bar_height / steps)
@@ -564,11 +588,11 @@ Si alguna población se extingue, todo el sistema puede colapsar.
                 self.graph_canvas.create_rectangle(x1, y_start, x2, y_end, 
                                                   fill=dark_color, outline="")
         
-        # Borde
-        self.graph_canvas.create_rectangle(x1, y1, x2, y2, outline="white", width=2)
+        # Borde (más grueso)
+        self.graph_canvas.create_rectangle(x1, y1, x2, y2, outline="white", width=3)
         
         # Brillo superior - usar gris muy claro
-        self.graph_canvas.create_rectangle(x1, y1, x2, y1 + 5, 
+        self.graph_canvas.create_rectangle(x1, y1, x2, y1 + 6, 
                                           fill="#f8fafc", outline="")
     
     def draw_pie_chart(self):
@@ -583,10 +607,10 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         if width <= 1 or height <= 1:
             return
         
-        # Centro y radio del gráfico
+        # Centro y radio del gráfico (más grande)
         center_x = width // 2
         center_y = height // 2
-        radius = min(width, height) // 3
+        radius = min(width, height) // 2.5  # Gráfico más grande
         
         # Calcular totales
         total = self.foxes + self.rabbits + self.carrots
@@ -598,10 +622,10 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         rabbit_angle = (self.rabbits / total) * 360
         carrot_angle = (self.carrots / total) * 360
         
-        # Dibujar título
-        self.graph_canvas.create_text(center_x, 30, 
+        # Dibujar título (más grande)
+        self.graph_canvas.create_text(center_x, 40, 
                                      text="Distribución Actual del Ecosistema", 
-                                     font=("Arial", 16, "bold"), fill="#1f2937")
+                                     font=("Arial", 18, "bold"), fill="#1f2937")
         
         # Ángulo de inicio
         start_angle = 0
@@ -614,22 +638,22 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         ]
         
         # Dibujar sombra - usar gris claro
-        self.graph_canvas.create_oval(center_x - radius + 5, center_y - radius + 5,
-                                     center_x + radius + 5, center_y + radius + 5,
+        self.graph_canvas.create_oval(center_x - radius + 6, center_y - radius + 6,
+                                     center_x + radius + 6, center_y + radius + 6,
                                      fill="#e5e7eb", outline="")
         
         # Dibujar segmentos
         for angle, color, dark_color, label, value in segments:
             if angle > 0:
-                # Segmento principal
+                # Segmento principal (más grueso)
                 self.graph_canvas.create_arc(center_x - radius, center_y - radius,
                                             center_x + radius, center_y + radius,
                                             start=start_angle, extent=angle,
-                                            fill=color, outline="white", width=3)
+                                            fill=color, outline="white", width=4)
                 
                 # Efecto 3D (borde oscuro)
-                self.graph_canvas.create_arc(center_x - radius + 2, center_y - radius + 2,
-                                            center_x + radius - 2, center_y + radius - 2,
+                self.graph_canvas.create_arc(center_x - radius + 3, center_y - radius + 3,
+                                            center_x + radius - 3, center_y + radius - 3,
                                             start=start_angle, extent=angle,
                                             fill=dark_color, outline="", width=0,
                                             style=tk.CHORD)
@@ -643,13 +667,13 @@ Si alguna población se extingue, todo el sistema puede colapsar.
                 # Porcentaje
                 percentage = (value / total) * 100
                 
-                # Dibujar etiqueta con fondo
+                # Dibujar etiqueta con fondo (más grande)
                 text = f"{percentage:.1f}%"
-                self.graph_canvas.create_oval(label_x - 30, label_y - 20,
-                                            label_x + 30, label_y + 20,
-                                            fill="white", outline=color, width=2)
+                self.graph_canvas.create_oval(label_x - 35, label_y - 25,
+                                            label_x + 35, label_y + 25,
+                                            fill="white", outline=color, width=3)
                 self.graph_canvas.create_text(label_x, label_y, text=text,
-                                            font=("Arial", 11, "bold"), fill=color)
+                                            font=("Arial", 12, "bold"), fill=color)
                 
                 start_angle += angle
         
@@ -657,35 +681,38 @@ Si alguna población se extingue, todo el sistema puede colapsar.
         inner_radius = radius * 0.4
         self.graph_canvas.create_oval(center_x - inner_radius, center_y - inner_radius,
                                      center_x + inner_radius, center_y + inner_radius,
-                                     fill="white", outline="#e5e7eb", width=2)
+                                     fill="white", outline="#e5e7eb", width=3)
         
-        # Texto central
-        self.graph_canvas.create_text(center_x, center_y - 10, text="Total",
-                                     font=("Arial", 12, "bold"), fill="#6b7280")
-        self.graph_canvas.create_text(center_x, center_y + 15, text=f"{int(total)}",
-                                     font=("Arial", 20, "bold"), fill="#1f2937")
+        # Texto central (más grande)
+        self.graph_canvas.create_text(center_x, center_y - 12, text="Total",
+                                     font=("Arial", 14, "bold"), fill="#6b7280")
+        self.graph_canvas.create_text(center_x, center_y + 18, text=f"{int(total)}",
+                                     font=("Arial", 24, "bold"), fill="#1f2937")
         
         # Leyenda detallada
-        legend_y = height - 100
-        legend_x_start = 50
+        legend_y = height - 120
+        legend_x_start = 60
         
         for i, (angle, color, dark_color, label, value) in enumerate(segments):
-            x = legend_x_start + (i * (width - 100) // 3)
+            x = legend_x_start + (i * (width - 120) // 3)
             
-            # Cuadro de color
-            self.graph_canvas.create_rectangle(x, legend_y, x + 30, legend_y + 30,
-                                             fill=color, outline="white", width=2)
+            # Cuadro de color (más grande)
+            self.graph_canvas.create_rectangle(x, legend_y, x + 35, legend_y + 35,
+                                             fill=color, outline="white", width=3)
             
-            # Texto
-            self.graph_canvas.create_text(x + 40, legend_y + 5, text=label,
-                                         anchor=tk.W, font=("Arial", 11, "bold"),
+            # Texto (más grande)
+            self.graph_canvas.create_text(x + 45, legend_y + 8, text=label,
+                                         anchor=tk.W, font=("Arial", 12, "bold"),
                                          fill=color)
             
             percentage = (value / total) * 100
-            self.graph_canvas.create_text(x + 40, legend_y + 22,
+            self.graph_canvas.create_text(x + 45, legend_y + 28,
                                          text=f"{value:.1f} ({percentage:.1f}%)",
-                                         anchor=tk.W, font=("Arial", 9),
+                                         anchor=tk.W, font=("Arial", 10),
                                          fill="#6b7280")
+
+    # Los métodos restantes (toggle_simulation, run_simulation, simulate_day, update_display,
+    # update_analysis, update_alerts, toggle_config, reset_button_click) se mantienen igual
     
     def toggle_simulation(self):
         self.is_running = not self.is_running
